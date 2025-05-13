@@ -17,8 +17,7 @@
                 <v-list-item-group active-class="active-nav-item">
                     <v-list-item
                         v-if="isMobile"
-                        router
-                        to="/"
+                        router to="/"
                         :class="mobileLogoClass"
                         :style="'height: ' + topbarHeight + 'px'"
                         :ripple="false">

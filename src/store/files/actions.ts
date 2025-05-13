@@ -304,7 +304,7 @@ export const actions: ActionTree<FileState, RootState> = {
     },
 
     async uploadFile({ commit, rootGetters }, payload: { file: File; path: string; root: 'gcodes' | 'config' }) {
-        const apiUrl = rootGetters['socket/getUrl']
+        const apiUrl = rootGetters['socket/getApiUrl']
         const formData = new FormData()
         formData.append('file', payload.file, payload.file.name)
         formData.append('root', payload.root)
@@ -360,7 +360,7 @@ export const actions: ActionTree<FileState, RootState> = {
     },
 
     downloadZip({ rootGetters }, payload) {
-        const apiUrl = rootGetters['socket/getUrl']
+        const apiUrl = rootGetters['socket/getApiUrl']
         const url = `${apiUrl}/server/files/${payload.destination.root}/${encodeURI(payload.destination.path)}`
         window.open(url)
     },

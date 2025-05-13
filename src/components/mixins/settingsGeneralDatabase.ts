@@ -77,7 +77,7 @@ export default class SettingsGeneralDatabase extends BaseMixin {
         let backupableNamespaces: { value: string; label: string | TranslateResult }[] = []
 
         // load DB namespaces from moonraker
-        const urlRequestDbList = this.$store.getters['socket/getUrl'] + '/server/database/list'
+        const urlRequestDbList = this.$store.getters['socket/getApiUrl'] + '/server/database/list'
         const availableNamespaces = await fetch(urlRequestDbList)
             // read json
             .then((response) => response?.json())
@@ -91,7 +91,7 @@ export default class SettingsGeneralDatabase extends BaseMixin {
         // load mainsail keys, if mainsail namespace exists
         if (availableNamespaces.includes('mainsail')) {
             const urlRequestMainsailNamespace =
-                this.$store.getters['socket/getUrl'] + '/server/database/item?namespace=mainsail'
+                this.$store.getters['socket/getApiUrl'] + '/server/database/item?namespace=mainsail'
             backupableNamespaces = await fetch(urlRequestMainsailNamespace)
                 // read json
                 .then((response) => response?.json())

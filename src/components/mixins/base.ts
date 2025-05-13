@@ -6,7 +6,7 @@ import { ServerPowerStateDevice } from '@/store/server/power/types'
 @Component
 export default class BaseMixin extends Vue {
     get apiUrl(): boolean {
-        return this.$store.getters['socket/getUrl']
+        return this.$store.getters['socket/getApiUrl']
     }
 
     get hostUrl(): boolean {

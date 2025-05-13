@@ -31,7 +31,7 @@ export const actions: ActionTree<EditorState, RootState> = {
         fullFilepathArray.push(payload.filename)
 
         const fullFilepath = fullFilepathArray.join('/')
-        const url = rootGetters['socket/getUrl'] + '/server/files/' + escapePath(fullFilepath) + `?${Date.now()}`
+        const url = rootGetters['socket/getApiUrl'] + '/server/files/' + escapePath(fullFilepath) + `?${Date.now()}`
 
         if (state.cancelToken) dispatch('cancelLoad')
 
@@ -81,7 +81,7 @@ export const actions: ActionTree<EditorState, RootState> = {
         formData.append('path', state.filepath)
         formData.append('checksum', sha256(payload.content))
 
-        const url = rootGetters['socket/getUrl'] + '/server/files/upload'
+        const url = rootGetters['socket/getApiUrl'] + '/server/files/upload'
         if (state.cancelToken) dispatch('cancelLoad')
         const CancelToken = axios.CancelToken
         const source = CancelToken.source()

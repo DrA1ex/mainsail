@@ -22,7 +22,7 @@ export const actions: ActionTree<GuiState, RootState> = {
     },
 
     async initStore({ commit, dispatch, rootGetters, rootState }, payload) {
-        const baseUrl = rootGetters['socket/getUrl'] + '/server/database/item'
+        const baseUrl = rootGetters['socket/getApiUrl'] + '/server/database/item'
         const mainsailUrl = baseUrl + '?namespace=mainsail'
 
         if ('remoteprinters' in payload.value) {
@@ -115,10 +115,10 @@ export const actions: ActionTree<GuiState, RootState> = {
      * Create mainsail namespace in moonraker DB and fill in default values
      */
     async initDb({ dispatch, rootGetters }) {
-        const baseUrl = rootGetters['socket/getUrl'] + '/server/database/item'
+        const baseUrl = rootGetters['socket/getApiUrl'] + '/server/database/item'
 
         const urlDefault =
-            rootGetters['socket/getUrl'] + '/server/files/config/' + themeDir + '/default.json?time=' + Date.now()
+            rootGetters['socket/getApiUrl'] + '/server/files/config/' + themeDir + '/default.json?time=' + Date.now()
         const responseDefault = await fetch(urlDefault)
         let defaults: any = {}
         if (responseDefault) {
@@ -232,10 +232,10 @@ export const actions: ActionTree<GuiState, RootState> = {
     },
 
     async resetMoonrakerDB({ rootGetters }, payload) {
-        const baseUrl = rootGetters['socket/getUrl'] + '/server/database/item'
+        const baseUrl = rootGetters['socket/getApiUrl'] + '/server/database/item'
 
         const urlDefault =
-            rootGetters['socket/getUrl'] + '/server/files/config/' + themeDir + '/default.json?time=' + Date.now()
+            rootGetters['socket/getApiUrl'] + '/server/files/config/' + themeDir + '/default.json?time=' + Date.now()
 
         let defaults: any = {}
         try {
@@ -273,11 +273,11 @@ export const actions: ActionTree<GuiState, RootState> = {
                     }
                 }
             } else if (key === 'history_jobs') {
-                await fetch(rootGetters['socket/getUrl'] + '/server/history/job?all=true', { method: 'DELETE' })
+                await fetch(rootGetters['socket/getApiUrl'] + '/server/history/job?all=true', { method: 'DELETE' })
             } else if (key === 'history_totals') {
-                await fetch(rootGetters['socket/getUrl'] + '/server/history/reset_totals', { method: 'POST' })
+                await fetch(rootGetters['socket/getApiUrl'] + '/server/history/reset_totals', { method: 'POST' })
             } else {
-                await fetch(rootGetters['socket/getUrl'] + '/server/database/item?namespace=mainsail&key=' + key, {
+                await fetch(rootGetters['socket/getApiUrl'] + '/server/database/item?namespace=mainsail&key=' + key, {
                     method: 'DELETE',
                 })
 
@@ -303,13 +303,13 @@ export const actions: ActionTree<GuiState, RootState> = {
     async backupMoonrakerDB({ rootGetters }, payload) {
         const backup: any = {}
 
-        const responseMainsail = await fetch(rootGetters['socket/getUrl'] + '/server/database/item?namespace=mainsail')
+        const responseMainsail = await fetch(rootGetters['socket/getApiUrl'] + '/server/database/item?namespace=mainsail')
         const objectsMainsail = await responseMainsail.json()
         const mainsailDb = objectsMainsail?.result?.value ?? {}
 
         for (const key of payload) {
             if (['timelapse', 'webcams'].includes(key)) {
-                const url = rootGetters['socket/getUrl'] + '/server/database/item?namespace=' + key
+                const url = rootGetters['socket/getApiUrl'] + '/server/database/item?namespace=' + key
 
                 const response = await fetch(url)
                 const objects = await response.json()
@@ -330,9 +330,9 @@ export const actions: ActionTree<GuiState, RootState> = {
     },
 
     async restoreMoonrakerDB({ rootGetters }, payload) {
-        const baseUrl = rootGetters['socket/getUrl'] + '/server/database/item'
+        const baseUrl = rootGetters['socket/getApiUrl'] + '/server/database/item'
         const mainsailUrl = baseUrl + '?namespace=mainsail'
-        const responseNamespaces = await fetch(rootGetters['socket/getUrl'] + '/server/database/list')
+        const responseNamespaces = await fetch(rootGetters['socket/getApiUrl'] + '/server/database/list')
         const objectsNamespaces = await responseNamespaces.json()
         const namespacesArray = objectsNamespaces?.result?.namespaces ?? []
         let mainsailArray: string[] = []

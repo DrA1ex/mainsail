@@ -19,7 +19,7 @@ export const actions: ActionTree<GuiMaintenanceState, RootState> = {
     },
 
     async initDb({ dispatch, rootGetters }) {
-        const baseUrl = rootGetters['socket/getUrl']
+        const baseUrl = rootGetters['socket/getApiUrl']
         const url = `${baseUrl}/server/files/config/${themeDir}/maintenance.json?time=${Date.now()}`
 
         const defaults: MaintenanceJson = await fetch(url)

@@ -49,7 +49,7 @@ export const getters: GetterTree<ServerJobQueueState, any> = {
 
             if (thumbnail && 'relative_path' in thumbnail)
                 return (
-                    rootGetters['socket/getUrl'] +
+                    rootGetters['socket/getApiUrl'] +
                     '/server/files/' +
                     escapePath(path) +
                     '/' +
@@ -72,7 +72,7 @@ export const getters: GetterTree<ServerJobQueueState, any> = {
 
             if (thumbnail && 'relative_path' in thumbnail)
                 return (
-                    rootGetters['socket/getUrl'] +
+                    rootGetters['socket/getApiUrl'] +
                     '/server/files/' +
                     escapePath(path) +
                     '/' +

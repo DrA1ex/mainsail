@@ -47,7 +47,7 @@ export const getters: GetterTree<FileState, any> = {
             const rootGcodes = getters['getDirectory']('gcodes')
             if (rootGcodes === null) return []
 
-            let baseURL = `${rootGetters['socket/getUrl']}/server/files/gcodes`
+            let baseURL = `${rootGetters['socket/getApiUrl']}/server/files/gcodes`
             let files: FileStateFile[] = []
 
             if (path !== null) {
@@ -201,7 +201,7 @@ export const getters: GetterTree<FileState, any> = {
         )
         if (!file) return null
 
-        return `${rootGetters['socket/getUrl']}/server/files/config/${themeDir}/${
+        return `${rootGetters['socket/getApiUrl']}/server/files/config/${themeDir}/${
             file.filename
         }?timestamp=${file.modified.getTime()}`
     },
@@ -287,7 +287,7 @@ export const getters: GetterTree<FileState, any> = {
             )
 
             if (thumbnail && 'relative_path' in thumbnail) {
-                return `${rootGetters['socket/getUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
+                return `${rootGetters['socket/getApiUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
                     thumbnail.relative_path
                 )}?timestamp=${item.modified.getTime()}`
             }
@@ -301,7 +301,7 @@ export const getters: GetterTree<FileState, any> = {
             const thumbnail = item.thumbnails.find((thumb) => thumb.width >= thumbnailBigMin)
 
             if (thumbnail && 'relative_path' in thumbnail) {
-                return `${rootGetters['socket/getUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
+                return `${rootGetters['socket/getApiUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
                     thumbnail.relative_path
                 )}?timestamp=${item.modified.getTime()}`
             }
