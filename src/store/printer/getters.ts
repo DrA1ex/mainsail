@@ -157,10 +157,11 @@ export const getters: GetterTree<PrinterState, RootState> = {
                 // remove macros with a '_' as first char
                 if (name.startsWith('_')) return
 
-                // remove macros with rename_existing in the config
                 const propLower = prop.toLowerCase()
                 const propSettings = settings[propLower] ?? {}
-                if ('rename_existing' in propSettings) return
+
+                // remove macros with rename_existing in the config
+                // if ('rename_existing' in propSettings) return
 
                 const variables = state[prop] ?? {}
 
