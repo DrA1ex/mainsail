@@ -20,7 +20,7 @@ export const themeDir = '.theme'
 export const datasetInterval = 1000
 export const datasetTypes = ['temperature', 'target', 'power', 'speed']
 export const datasetTypesInPercents = ['power', 'speed']
-export const additionalSensors = ['aht10', 'bme280', 'htu21d', 'sgp40', 'sht3x']
+export const additionalSensors = ['aht10', 'aht1x', 'aht2x', 'aht3x', 'bme280', 'htu21d', 'sgp40', 'sht3x', 'temperature_combined']
 
 /*
  * List of valid gcode file extensions
@@ -58,10 +58,20 @@ export const checkKlipperConfigModules = [
 export const allowedMetadata = [
     'uuid',
     'estimated_time',
+    'extruder_colors',
+    'filament_change_count',
+    'filament_colors',
     'filament_name',
+    'filament_temps',
     'filament_type',
+    'filament_colors',
+    'extruder_colors',
+    'filament_temps',
+    'referenced_tools',
+    'mmu_print',
     'filament_total',
     'filament_weight_total',
+    'filament_weights',
     'nozzle_diameter',
     'first_layer_bed_temp',
     'first_layer_extr_temp',
@@ -71,8 +81,10 @@ export const allowedMetadata = [
     'gcode_start_byte',
     'job_id',
     'layer_height',
+    'mmu_print',
     'object_height',
     'print_start_time',
+    'referenced_tools',
     'size',
     'slicer',
     'slicer_version',
@@ -86,13 +98,16 @@ export const maxGcodeHistory = 50
  * List of generic dashboard panels
  */
 export const allDashboardPanels = [
+    'afc',
     'toolhead-control',
     'extruder-control',
     'macros',
+    'led-effects',
     'machine-settings',
     'miniconsole',
     'miscellaneous',
     'spoolman',
+    'mmu',
     'temperature',
     'webcam',
 ]
