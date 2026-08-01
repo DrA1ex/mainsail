@@ -171,7 +171,7 @@ export const getters: GetterTree<FileState, RootState> = {
         )
         if (!file) return null
 
-        return `${rootGetters['socket/getUrl']}/server/files/config/${themeDir}/${
+        return `${rootGetters['socket/getApiUrl']}/server/files/config/${themeDir}/${
             file.filename
         }?timestamp=${file.modified.getTime()}`
     },
@@ -257,7 +257,7 @@ export const getters: GetterTree<FileState, RootState> = {
             )
 
             if (thumbnail && 'relative_path' in thumbnail) {
-                return `${rootGetters['socket/getUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
+                return `${rootGetters['socket/getApiUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
                     thumbnail.relative_path
                 )}?timestamp=${item.modified.getTime()}`
             }
@@ -271,7 +271,7 @@ export const getters: GetterTree<FileState, RootState> = {
             const thumbnail = item.thumbnails.find((thumb) => thumb.width >= thumbnailBigMin)
 
             if (thumbnail && 'relative_path' in thumbnail) {
-                return `${rootGetters['socket/getUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
+                return `${rootGetters['socket/getApiUrl']}/server/files/${escapePath(currentPath)}/${escapePath(
                     thumbnail.relative_path
                 )}?timestamp=${item.modified.getTime()}`
             }
