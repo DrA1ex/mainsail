@@ -12,7 +12,7 @@ import buildReleaseInfo from './src/plugins/build-release_info'
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
 import postcssNesting from 'postcss-nesting'
 
-const base = '/mainsail'
+const base = '/mainsail/'
 
 const PWAConfig: Partial<VitePWAOptions> = {
     registerType: 'autoUpdate',
@@ -23,27 +23,27 @@ const PWAConfig: Partial<VitePWAOptions> = {
         description: 'Web interface for Klipper 3D printer firmware',
         theme_color: '#D51F26',
         display: 'standalone',
-        start_url: `${base}/`,
+        start_url: base,
         background_color: '#121212',
         icons: [
             {
-                src: `${base}/img/icons/icon-192.png`,
+                src: `${base}img/icons/icon-192.png`,
                 sizes: '192x192',
                 type: 'image/png',
             },
             {
-                src: `${base}/img/icons/icon-192-maskable.png`,
+                src: `${base}img/icons/icon-192-maskable.png`,
                 sizes: '192x192',
                 type: 'image/png',
                 purpose: 'maskable',
             },
             {
-                src: `${base}/img/icons/icon-512.png`,
+                src: `${base}img/icons/icon-512.png`,
                 sizes: '512x512',
                 type: 'image/png',
             },
             {
-                src: `${base}/img/icons/icon-512-maskable.png`,
+                src: `${base}img/icons/icon-512-maskable.png`,
                 sizes: '512x512',
                 type: 'image/png',
                 purpose: 'maskable',
