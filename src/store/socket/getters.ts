@@ -2,7 +2,7 @@ import { GetterTree } from 'vuex'
 import { SocketState } from '@/store/socket/types'
 import { RootState } from '@/store/types'
 
-function _getUrl(state: any) {
+function _getUrl(state: SocketState) {
     const port = state.port !== 80 ? ':' + state.port : ''
     let path = '/' + state.path.replace(/^\/|\/$/g, '')
 

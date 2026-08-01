@@ -1,4 +1,5 @@
 import { GuiState } from '@/store/gui/types'
+import { RootState } from '@/store/types'
 import { Module } from 'vuex'
 import { actions } from '@/store/gui/actions'
 import { mutations } from '@/store/gui/mutations'
@@ -120,6 +121,7 @@ export const getDefaultState = (): GuiState => {
         editor: {
             escToClose: true,
             confirmUnsavedChanges: true,
+            klipperDocsTooltips: true,
             klipperRestartMethod: 'FIRMWARE_RESTART',
             tabSize: 2,
             fileStructureSidebar: true,
@@ -190,6 +192,14 @@ export const getDefaultState = (): GuiState => {
             hideOtherInstances: false,
         },
         view: {
+            afc: {
+                hiddenExtruders: [],
+                hiddenUnits: [],
+                showFilamentName: false,
+                showLaneInfinite: true,
+                showUnitIcons: true,
+                showTd1Color: true,
+            },
             blockFileUpload: false,
             configfiles: {
                 countPerPage: 10,
@@ -210,17 +220,19 @@ export const getDefaultState = (): GuiState => {
             },
             gcodefiles: {
                 countPerPage: 10,
+                search: '',
                 sortBy: 'modified',
                 sortDesc: true,
                 showHiddenFiles: false,
                 showPrintedFiles: true,
-                hideMetadataColumns: [],
+                hideMetadataColumns: ['filament_name', 'filament_type', 'filament_weight_total'],
                 orderMetadataColumns: [
                     'size',
                     'modified',
                     'object_height',
                     'layer_height',
                     'nozzle_diameter',
+                    'filaments',
                     'filament_name',
                     'filament_type',
                     'filament_total',
@@ -265,6 +277,16 @@ export const getDefaultState = (): GuiState => {
                 countPerPage: 10,
             },
             lockedSliders: [],
+            mmu: {
+                showClogDetection: true,
+                showTtgMap: true,
+                showDetails: true,
+                largeFilamentStatus: false,
+                showLogos: true,
+                showName: true,
+                showClimate: true,
+                showUnavailableSpoolColor: false,
+            },
             tempchart: {
                 boolTempchart: true,
                 hiddenDataset: [],
@@ -301,7 +323,7 @@ export const getDefaultState = (): GuiState => {
 // initial state
 const state = getDefaultState()
 
-export const gui: Module<GuiState, any> = {
+export const gui: Module<GuiState, RootState> = {
     namespaced: true,
     state,
     getters,

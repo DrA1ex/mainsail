@@ -11,7 +11,9 @@ import {
     PrinterStateMcu,
     PrinterStateMacro,
     PrinterGetterObject,
-    PrinterStateLight,
+    PrinterConfigMcuTempSensor,
+    PrinterTempSensorObject,
+    McuTempSensorEntry,
 } from '@/store/printer/types'
 import { caseInsensitiveSort, formatFrequency, getMacroParams } from '@/plugins/helpers'
 import { RootState } from '@/store/types'
@@ -160,9 +162,6 @@ export const getters: GetterTree<PrinterState, RootState> = {
                 const propLower = prop.toLowerCase()
                 const propSettings = settings[propLower] ?? {}
 
-                // remove macros with rename_existing in the config
-                // if ('rename_existing' in propSettings) return
-
                 const variables = state[prop] ?? {}
 
                 array.push({
@@ -197,7 +196,7 @@ export const getters: GetterTree<PrinterState, RootState> = {
             fans.push({
                 name: object.name,
                 type: object.type,
-                speed: object.state.speed ?? 0,
+                speed: (object.state.speed as number) ?? 0,
                 controllable: controllableFans.includes(object.type),
             })
         })
@@ -206,92 +205,6 @@ export const getters: GetterTree<PrinterState, RootState> = {
             if (a.controllable < b.controllable) return 1
             if (a.controllable > b.controllable) return -1
 
-            const nameA = a.name.toUpperCase()
-            const nameB = b.name.toUpperCase()
-
-            if (nameA < nameB) return -1
-            if (nameA > nameB) return 1
-
-            return 0
-        })
-    },
-
-    getLights: (state, getters) => {
-        const lights: PrinterStateLight[] = []
-        const supportedObjects = ['dotstar', 'led', 'neopixel', 'pca9533', 'pca9632']
-        const objects = getters.getPrinterObjects(supportedObjects)
-
-        objects
-            .filter((object: PrinterGetterObject) => {
-                return !object.name.startsWith('_')
-            })
-            .forEach((object: PrinterGetterObject) => {
-                let colorOrder = 'RGB'
-                let singleChannelTarget = null
-                const colorData = object.state.color_data ?? []
-
-                if ('color_order' in object.settings) {
-                    if (typeof object.settings.color_order === 'string') {
-                        colorOrder = object.settings.color_order
-                    } else if (Array.isArray(object.settings.color_order) && object.settings.color_order.length > 0) {
-                        colorOrder = object.settings.color_order[0]
-                    }
-                }
-
-                if (object.type === 'led') {
-                    colorOrder = ''
-                    if ('red_pin' in object.config) colorOrder += 'R'
-                    if ('green_pin' in object.config) colorOrder += 'G'
-                    if ('blue_pin' in object.config) colorOrder += 'B'
-                    if ('white_pin' in object.config) colorOrder += 'W'
-                }
-
-                let initialRed = object.settings.initial_red ?? null
-                if (!('initial_red' in object.config)) initialRed = null
-
-                let initialGreen = object.settings.initial_green ?? null
-                if (!('initial_green' in object.config)) initialGreen = null
-
-                let initialBlue = object.settings.initial_blue ?? null
-                if (!('initial_blue' in object.config)) initialBlue = null
-
-                let initialWhite = object.settings.initial_white ?? null
-                if (!('initial_white' in object.config)) initialWhite = null
-
-                if (object.type === 'led' && colorOrder.length === 1) {
-                    const firstColorData = colorData[0] ?? []
-
-                    switch (colorOrder) {
-                        case 'R':
-                            singleChannelTarget = firstColorData[0] ?? 0
-                            break
-                        case 'G':
-                            singleChannelTarget = firstColorData[1] ?? 0
-                            break
-                        case 'B':
-                            singleChannelTarget = firstColorData[2] ?? 0
-                            break
-                        case 'W':
-                            singleChannelTarget = firstColorData[3] ?? 0
-                            break
-                    }
-                }
-
-                lights.push({
-                    name: object.name,
-                    type: object.type as PrinterStateLight['type'],
-                    chainCount: object.settings.chain_count ?? 1,
-                    colorOrder,
-                    initialRed,
-                    initialGreen,
-                    initialBlue,
-                    initialWhite,
-                    colorData,
-                    singleChannelTarget,
-                })
-            })
-
-        return lights.sort((a, b) => {
             const nameA = a.name.toUpperCase()
             const nameB = b.name.toUpperCase()
 
@@ -415,23 +328,7 @@ export const getters: GetterTree<PrinterState, RootState> = {
             }
         }
 
-        output.sort((a, b) => {
-            if (a.type < b.type) return -1
-            if (a.type > b.type) return 1
-
-            if (a.unit < b.unit) return -1
-            if (a.unit > b.unit) return 1
-
-            const nameA = a.name.toUpperCase()
-            const nameB = b.name.toUpperCase()
-
-            if (nameA < nameB) return -1
-            if (nameA > nameB) return 1
-
-            return 0
-        })
-
-        return output
+        return caseInsensitiveSort(output, 'type', 'unit', 'name')
     },
 
     getAvailableHeaters: (state) => {
@@ -513,18 +410,17 @@ export const getters: GetterTree<PrinterState, RootState> = {
     },
 
     getPrinterConfigObjects: (state) => (objectNames: string[]) => {
-        // eslint-disable-next-line
-        const output: any = {}
+        const settings = state.configfile?.settings
+        if (!settings) return {}
 
-        if (state.configfile?.settings) {
-            Object.keys(state.configfile.settings).forEach((key) => {
-                const keySplits = key.split(' ')
+        const output: Record<string, unknown> = {}
+        Object.keys(settings).forEach((key) => {
+            const keySplits = key.split(' ')
 
-                if (objectNames.includes(keySplits[0])) {
-                    output[key] = state.configfile.settings[key]
-                }
-            })
-        }
+            if (objectNames.includes(keySplits[0])) {
+                output[key] = settings[key]
+            }
+        })
 
         return output
     },
@@ -536,10 +432,14 @@ export const getters: GetterTree<PrinterState, RootState> = {
 
         const objects = getters.getPrinterConfigObjects(checkObjects)
         Object.keys(objects).forEach((key) => {
-            const settings = objects[key]
+            const settings = objects[key] as PrinterConfigMcuTempSensor
             const caseKey: string =
                 Object.keys(state).find((state_key: string) => state_key.toLowerCase() === key.toLowerCase()) || ''
-            if ('sensor_type' in settings && sensorTypes.includes(settings.sensor_type) && caseKey in state) {
+            if (
+                typeof settings.sensor_type === 'string' &&
+                sensorTypes.includes(settings.sensor_type) &&
+                caseKey in state
+            ) {
                 const value = state[caseKey]
 
                 output = {
@@ -555,20 +455,19 @@ export const getters: GetterTree<PrinterState, RootState> = {
 
     getMcuTempSensors: (state, getters) => {
         const checkObjects = ['temperature_sensor', 'temperature_fan']
-        // eslint-disable-next-line
-        const output: { key: string; settings: any; object: any }[] = []
+        const output: McuTempSensorEntry[] = []
 
         const objects = getters.getPrinterConfigObjects(checkObjects)
         Object.keys(objects).forEach((key) => {
-            const value = objects[key]
+            const value: PrinterConfigMcuTempSensor = objects[key]
             const caseKey: string =
                 Object.keys(state).find((state_key: string) => state_key.toLowerCase() === key.toLowerCase()) || ''
 
-            if ('sensor_type' in value && value.sensor_type === 'temperature_mcu' && 'sensor_mcu' in value) {
+            if (value.sensor_type === 'temperature_mcu' && typeof value.sensor_mcu === 'string') {
                 output.push({
                     key: caseKey,
                     settings: value,
-                    object: caseKey in state ? state[caseKey] : {},
+                    object: (caseKey in state ? state[caseKey] : {}) as PrinterTempSensorObject,
                 })
             }
         })
@@ -577,18 +476,19 @@ export const getters: GetterTree<PrinterState, RootState> = {
     },
 
     getMcuTempSensor: (state, getters) => (mcuName: string) => {
-        interface McuTempSensor {
-            temperature: number
-            measured_min_temp: number | null
-            measured_max_temp: number | null
-        }
-
-        let output: McuTempSensor | null = null
+        let output: {
+            temperature: string
+            measured_min_temp: string | null
+            measured_max_temp: string | null
+        } | null = null
 
         const sensors = getters.getMcuTempSensors
-        // eslint-disable-next-line
-        sensors.forEach((sensor: { key: string; settings: any; object: any }) => {
-            if (mcuName.endsWith(sensor.settings?.sensor_mcu) && sensor.object?.temperature) {
+        sensors.forEach((sensor: McuTempSensorEntry) => {
+            if (
+                typeof sensor.settings.sensor_mcu === 'string' &&
+                mcuName.endsWith(sensor.settings.sensor_mcu) &&
+                typeof sensor.object.temperature === 'number'
+            ) {
                 output = {
                     temperature: sensor.object.temperature.toFixed(0),
                     measured_min_temp: sensor.object.measured_min_temp?.toFixed(1) ?? null,
@@ -797,23 +697,30 @@ export const getters: GetterTree<PrinterState, RootState> = {
     getEstimatedTimeETAFormat: (state, getters, rootState, rootGetters) => {
         const hours12Format = rootGetters['gui/getHours12Format'] ?? false
         const eta = getters['getEstimatedTimeETA']
-        if (eta === 0) return '--'
 
-        const date = new Date(eta)
-        let am = true
-        let h: string | number = date.getHours()
+        const now = new Date()
+        const etaDate = new Date(eta)
+        if (etaDate <= now) return '--'
 
-        if (hours12Format && h > 11) am = false
-        if (hours12Format && h > 12) h -= 12
-        if (hours12Format && h == 0) h += 12
-        if (h < 10) h = '0' + h
+        const hours = etaDate.getHours()
+        const minutes = etaDate.getMinutes()
 
-        const m = date.getMinutes() >= 10 ? date.getMinutes() : '0' + date.getMinutes()
+        let displayHour = hours
+        let amPm = ''
 
-        const diff = eta - new Date().getTime()
-        let output = h + ':' + m
-        if (hours12Format) output += ` ${am ? 'AM' : 'PM'}`
-        if (diff > 60 * 60 * 24 * 1000) output += `+${Math.trunc(diff / (60 * 60 * 24 * 1000))}`
+        if (hours12Format) {
+            amPm = hours >= 12 ? ' PM' : ' AM'
+            displayHour = hours % 12 || 12
+        }
+
+        const output = `${String(displayHour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}${amPm}`
+
+        const MS_PER_DAY = 86_400_000
+        now.setHours(0, 0, 0, 0)
+        etaDate.setHours(0, 0, 0, 0)
+        const dayDiff = Math.round((etaDate.getTime() - now.getTime()) / MS_PER_DAY)
+
+        if (dayDiff > 0) return `${output} +${dayDiff}`
 
         return output
     },

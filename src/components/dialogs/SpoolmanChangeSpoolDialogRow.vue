@@ -1,7 +1,12 @@
 <template>
     <tr class="cursor-pointer" @click="setSpoolRow">
         <td style="width: 50px" class="pr-0 py-2">
-            <spool-icon :color="color" style="width: 50px; float: left" class="mr-3" />
+            <spool-icon
+                :color="color"
+                :multi-color-hexes="multi_color_hexes"
+                :multi-color-direction="multi_color_direction"
+                style="width: 50px; float: left"
+                class="mr-3" />
         </td>
 
         <td class="py-2" style="min-width: 300px">
@@ -17,6 +22,12 @@
                         <template v-if="spool.comment">
                             <br />
                             <small class="comment">{{ spool.comment }}</small>
+                        </template>
+                        <template v-if="spoolLoaded">
+                            <br />
+                            <v-chip color="primary" small class="mt-2">
+                                {{ $t('Panels.AfcPanel.LoadedInLane', { lane: spoolLoaded.lane.toUpperCase() }) }}
+                            </v-chip>
                         </template>
                     </v-list-item-title>
                 </v-list-item-content>
@@ -36,8 +47,9 @@ import Component from 'vue-class-component'
 import { Mixins, Prop } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import { ServerSpoolmanStateSpool } from '@/store/server/spoolman/types'
+import AfcMixin from '@/components/mixins/afc'
 @Component({})
-export default class SpoolmanChangeSpoolDialogRow extends Mixins(BaseMixin) {
+export default class SpoolmanChangeSpoolDialogRow extends Mixins(BaseMixin, AfcMixin) {
     @Prop({ required: true }) declare readonly spool: ServerSpoolmanStateSpool
     @Prop({ required: false }) declare readonly max_id_digits: number
 
@@ -45,6 +57,14 @@ export default class SpoolmanChangeSpoolDialogRow extends Mixins(BaseMixin) {
         const color = this.spool.filament?.color_hex ?? '000'
 
         return `#${color}`
+    }
+
+    get multi_color_hexes() {
+        return this.spool.filament?.multi_color_hexes
+    }
+
+    get multi_color_direction() {
+        return this.spool.filament?.multi_color_direction
     }
 
     get id() {
@@ -116,6 +136,13 @@ export default class SpoolmanChangeSpoolDialogRow extends Mixins(BaseMixin) {
         }
 
         return date.toLocaleDateString()
+    }
+
+    get spoolLoaded() {
+        const spools = this.afcLoadedSpools ?? []
+        if (!spools.length) return false
+
+        return spools.find((s) => s.spoolId === this.spool.id)
     }
 
     setSpoolRow() {
